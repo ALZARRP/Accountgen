@@ -14,14 +14,10 @@ from typing import IO
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
-from aioconsole import aprint, ainput
 from aiofiles import open as openfile
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
-from colorama import Fore, init
 from requests import get
-
-init()
 
 
 class AutoUpdater:
