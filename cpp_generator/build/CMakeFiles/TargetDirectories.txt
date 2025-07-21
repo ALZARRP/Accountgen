@@ -1,0 +1,3 @@
+/app/cpp_generator/build/CMakeFiles/cc_generator.dir
+/app/cpp_generator/build/CMakeFiles/edit_cache.dir
+/app/cpp_generator/build/CMakeFiles/rebuild_cache.dir

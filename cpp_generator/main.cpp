@@ -4,7 +4,10 @@
 #include <numeric>
 #include <cstdlib>
 #include <ctime>
+
+#ifndef _WIN32
 #include <ncurses.h>
+#endif
 
 // Function to check if a credit card number is valid using the Luhn algorithm
 bool isValid(const std::string& number) {
@@ -60,6 +63,15 @@ std::string generateCVV() {
 }
 
 void printHelp() {
+#ifdef _WIN32
+    std::cout << "Usage: cc_generator [options]" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "  -h, --help\t\tShow this help message" << std::endl;
+    std::cout << "  -b, --bin <bin>\tSpecify the BIN to use" << std::endl;
+    std::cout << "  -n, --count <count>\tSpecify the number of cards to generate" << std::endl;
+    std::cout << "  -e, --exp\t\tInclude expiration date" << std::endl;
+    std::cout << "  -c, --cvv\t\tInclude CVV" << std::endl;
+#else
     printw("Usage: cc_generator [options]\n");
     printw("Options:\n");
     printw("  -h, --help\t\tShow this help message\n");
@@ -67,6 +79,7 @@ void printHelp() {
     printw("  -n, --count <count>\tSpecify the number of cards to generate\n");
     printw("  -e, --exp\t\tInclude expiration date\n");
     printw("  -c, --cvv\t\tInclude CVV\n");
+#endif
 }
 
 int main(int argc, char* argv[]) {
@@ -79,11 +92,15 @@ int main(int argc, char* argv[]) {
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
         if (arg == "-h" || arg == "--help") {
+#ifdef _WIN32
+            printHelp();
+#else
             initscr();
             printHelp();
             refresh();
             getch();
             endwin();
+#endif
             return 0;
         } else if (arg == "-b" || arg == "--bin") {
             if (i + 1 < argc) {
@@ -111,47 +128,71 @@ int main(int argc, char* argv[]) {
         bin = bins[rand() % bins.size()];
     }
 
+#ifndef _WIN32
     initscr();
     start_color();
     init_pair(1, COLOR_GREEN, COLOR_BLACK);
     init_pair(2, COLOR_YELLOW, COLOR_BLACK);
     init_pair(3, COLOR_CYAN, COLOR_BLACK);
+#endif
 
+#ifndef _WIN32
     attron(COLOR_PAIR(1));
     printw("Generated Credit Cards:\n");
     attroff(COLOR_PAIR(1));
+#else
+    std::cout << "Generated Credit Cards:" << std::endl;
+#endif
 
     for (int i = 0; i < count; ++i) {
         std::string cardNumber = generateCardNumber(bin);
+#ifndef _WIN32
         attron(COLOR_PAIR(2));
         printw("Card Number: ");
         attroff(COLOR_PAIR(2));
         attron(COLOR_PAIR(3));
         printw("%s", cardNumber.c_str());
         attroff(COLOR_PAIR(3));
+#else
+        std::cout << "Card Number: " << cardNumber;
+#endif
 
         if (includeExp) {
+#ifndef _WIN32
             attron(COLOR_PAIR(2));
             printw(" | Expiration Date: ");
             attroff(COLOR_PAIR(2));
             attron(COLOR_PAIR(3));
             printw("%s", generateExpirationDate().c_str());
             attroff(COLOR_PAIR(3));
+#else
+            std::cout << " | Expiration Date: " << generateExpirationDate();
+#endif
         }
         if (includeCvv) {
+#ifndef _WIN32
             attron(COLOR_PAIR(2));
             printw(" | CVV: ");
             attroff(COLOR_PAIR(2));
             attron(COLOR_PAIR(3));
-            printw("%s", generateCVV().c_str());
+            printw("%s", generateCVV().c_tr());
             attroff(COLOR_PAIR(3));
+#else
+            std::cout << " | CVV: " << generateCVV();
+#endif
         }
+#ifndef _WIN32
         printw("\n");
+#else
+        std::cout << std::endl;
+#endif
     }
 
+#ifndef _WIN32
     refresh();
     getch();
     endwin();
+#endif
 
     return 0;
 }

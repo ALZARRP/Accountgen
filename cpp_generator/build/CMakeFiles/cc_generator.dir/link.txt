@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/cc_generator.dir/main.cpp.o -o cc_generator  -lcurses /usr/lib/x86_64-linux-gnu/libform.so
