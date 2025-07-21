@@ -26,6 +26,15 @@ class App(ctk.CTk):
         self.service_dropdown = ctk.CTkComboBox(self.service_frame, values=self.config["services"])
         self.service_dropdown.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
+        self.amount_frame = ctk.CTkFrame(self)
+        self.amount_frame.grid(row=2, column=0, padx=20, pady=10, sticky="ew")
+
+        self.amount_label = ctk.CTkLabel(self.amount_frame, text="Amount:")
+        self.amount_label.grid(row=0, column=0, padx=10, pady=10)
+
+        self.amount_entry = ctk.CTkEntry(self.amount_frame)
+        self.amount_entry.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+
         self.generate_button = ctk.CTkButton(self, text="Generate Accounts", command=self.start_generator)
         self.generate_button.grid(row=2, column=0, padx=20, pady=10)
 
@@ -40,11 +49,13 @@ class App(ctk.CTk):
 
     def start_generator(self):
         service = self.service_dropdown.get()
+        amount = int(self.amount_entry.get())
         self.output_textbox.delete("1.0", "end")
         self.progress_bar.start()
 
         def run_async_loop():
-            asyncio.run(self.generator.run(service))
+            asyncio.run(self.generator.run(service, amount))
+            self.stop_generator()
 
         thread = Thread(target=run_async_loop)
         thread.start()

@@ -99,15 +99,16 @@ class Generator:
         self.output: IO = open(self.config["output"], "a+")
         self.tasks: list = []
 
-    async def run(self, service) -> None:
+    async def run(self, service, amount) -> None:
         self.tasks = []
         for i in range(self.config["thread"]):
             self.tasks.append(
-                create_task(self.generate(i, self.config['url'][service])))
+                create_task(self.generate(i, self.config['url'][service], amount)))
         await gather(*self.tasks)
 
-    async def generate(self, worker, url: str) -> None:
-        while True:
+    async def generate(self, worker, url: str, amount: int) -> None:
+        count = 0
+        while count < amount:
             try:
                 async with openfile(self.config["output"], "a+") as file:
                     async with ClientSession() as session:
@@ -117,6 +118,7 @@ class Generator:
                         if self.gui:
                             self.gui.update_output(f"{redirected_url}\n")
                         await file.write(f"{redirected_url}\n")
+                        count += 1
             except Exception as e:
                 if self.gui:
                     self.gui.update_output(f"An error occurred: {e}\n")
