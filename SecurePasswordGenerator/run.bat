@@ -1,3 +1,3 @@
 @echo off
-py generator.py
+python main.py
 PAUSE
