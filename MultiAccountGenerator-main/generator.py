@@ -14,8 +14,14 @@ from typing import IO
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
+from aioconsole import aprint, ainput
+from aiofiles import open as openfile
 from aiohttp import ClientSession
+from bs4 import BeautifulSoup
+from colorama import Fore, init
 from requests import get
+
+init()
 
 
 class AutoUpdater:
@@ -32,7 +38,7 @@ class AutoUpdater:
         zip_url: str
 
     def get_latest(self):
-        rjson = get("https://api.github.com/repos/Jules-Recode/SecurePasswordGenerator/tags").json()
+        rjson = get("https://api.github.com/repos/MatrixTM/MultiAccountGenerator/tags").json()
         return self.latest_data(version=rjson[0]["name"], zip_url=get(rjson[0]["zipball_url"]).url)
 
     @staticmethod
@@ -86,3 +92,37 @@ class AutoUpdater:
             exit("Run Script Again!")
             return
         print("Script is up to date!")
+
+
+class Generator:
+    def __init__(self, gui=None):
+        self.gui = gui
+        self.version = "v1.1"
+        # AutoUpdater(self.version).update()
+        self.config: dict = load(open('config.json'))
+        self.output: IO = open(self.config["output"], "a+")
+        self.tasks: list = []
+
+    async def run(self, service) -> None:
+        self.tasks = []
+        for i in range(self.config["thread"]):
+            self.tasks.append(
+                create_task(self.generate(i, self.config['url'][service])))
+        await gather(*self.tasks)
+
+    async def generate(self, worker, url: str) -> None:
+        while True:
+            try:
+                async with openfile(self.config["output"], "a+") as file:
+                    async with ClientSession() as session:
+                        request = await session.post(choice(url), data={"gen": ""},
+                                                     timeout=self.config["request-timeout"] or 5)
+                        redirected_url = request.url  # Get the redirected URL directly
+                        if self.gui:
+                            self.gui.update_output(f"{redirected_url}\n")
+                        await file.write(f"{redirected_url}\n")
+            except Exception as e:
+                if self.gui:
+                    self.gui.update_output(f"An error occurred: {e}\n")
+                else:
+                    print(f"An error occurred: {e}")
